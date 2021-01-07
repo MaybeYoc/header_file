@@ -127,19 +127,7 @@ void __read_once_size(const volatile void *p, void *res, int size)
 	__READ_ONCE_SIZE;
 }
 
-#ifdef CONFIG_KASAN
-/*
- * We can't declare function 'inline' because __no_sanitize_address confilcts
- * with inlining. Attempt to inline it may cause a build failure.
- * 	https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67368
- * '__maybe_unused' allows us to avoid defined-but-not-used warnings.
- */
-# define __no_kasan_or_inline __no_sanitize_address notrace __maybe_unused
-#else
-# define __no_kasan_or_inline __always_inline
-#endif
-
-static __no_kasan_or_inline
+static __always_inline
 void __read_once_size_nocheck(const volatile void *p, void *res, int size)
 {
 	__READ_ONCE_SIZE;
@@ -182,7 +170,6 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
  * required ordering.
  */
 #include <asm/barrier.h>
-#include <linux/kasan-checks.h>
 
 #define __READ_ONCE(x, check)						\
 ({									\
@@ -202,7 +189,7 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
  */
 #define READ_ONCE_NOCHECK(x) __READ_ONCE(x, 0)
 
-static __no_kasan_or_inline
+static __always_inline
 unsigned long read_word_at_a_time(const void *addr)
 {
 	kasan_check_read(addr, 1);
@@ -282,6 +269,6 @@ static inline void *offset_to_ptr(const int *off)
 		"Need native word sized stores/loads for atomicity.")
 
 /* &a[0] degrades to a pointer: a different type from an array */
-#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
-
+#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0])) /* TODO */
+													/* include/linux/build_bug.h */
 #endif /* __LINUX_COMPILER_H */
