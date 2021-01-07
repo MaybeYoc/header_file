@@ -269,6 +269,6 @@ static inline void *offset_to_ptr(const int *off)
 		"Need native word sized stores/loads for atomicity.")
 
 /* &a[0] degrades to a pointer: a different type from an array */
-#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0])) /* TODO */
-													/* include/linux/build_bug.h */
+#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
+
 #endif /* __LINUX_COMPILER_H */
